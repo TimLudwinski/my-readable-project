@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { withRouter, Link } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import { setCurrentPost, setComments, removeItem, changeItemScore } from '../actions';
 import { getPostData, deletePost, upVotePost, downVotePost } from '../utils';
 
