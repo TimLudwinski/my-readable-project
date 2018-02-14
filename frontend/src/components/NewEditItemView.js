@@ -9,7 +9,7 @@ class NewEditItemView extends Component {
   state = {
     body: "",
     title: "",
-    selected_category: this.props.current_category || this.props.categories[0],
+    selected_category: this.props.current_category,
     is_comment: false,
     mode: "new"
   }
@@ -34,7 +34,8 @@ class NewEditItemView extends Component {
     let set_state_promise = new Promise((resolve, reject) => resolve());
     if (mode === "edit") {
       if (main_post_id !== this.props.current_post.id)
-        set_state_promise = getPostData(main_post_id, this.props.setCurrentPost, this.props.setComments);
+        set_state_promise = getPostData(main_post_id, this.props.setCurrentPost, this.props.setComments)
+                              .then((post) => this.setState({selected_category: post.category}));
       if (is_comment) {
         set_state_promise.then(() => {
           let comment_item = this.props.comments.filter((comment) => comment.id === editing_id)[0]; // There should be only one...
@@ -44,16 +45,35 @@ class NewEditItemView extends Component {
         set_state_promise.then(() => { body = this.props.current_post.body; title = this.props.current_post.title; });
       }
     }
-    set_state_promise.then(() => this.setState({body, title, mode, is_comment, main_post_id, parent_id, editing_id, "selected_category": this.props.current_post.category || this.props.categories[0]}));
+    
+    set_state_promise.then(() => this.setState({body, title, mode, is_comment, main_post_id, parent_id, editing_id }));
   }
   
   onFormSubmit(e) {
+    if (this.state.body === "") {
+      alert("Please enter a body for the " + (this.state.comment ? "comment" : "post"));
+      e.preventDefault();
+      return;
+    }
+    
+    if (!this.state.is_comment && this.state.title === "") {
+      alert("Please enter a title for the post");
+      e.preventDefault();
+      return;
+    }
+    
     if (this.state.mode === "edit") {
       editItemData(this.state.is_comment, {id: this.state.editing_id, title: this.state.title, body: this.state.body}, editItem)
         .then(() => this.props.history.push("/" + this.props.current_post.category + "/" + this.state.main_post_id));
     } else {
+      if (!this.state.is_comment && (this.state.selected_category === undefined || this.state.selected_category === "")) {
+        alert("Please select a category");
+        e.preventDefault();
+        return;
+      } else 
+      
       newItem(this.state.is_comment, {title: this.state.title, body: this.state.body, category: this.state.selected_category, parentId: this.state.parent_id}, addItem)
-        .then( (new_post) => this.props.history.push("/" + this.state.selected_category + "/" + (this.state.main_post_id||new_post.post.id)) );
+        .then( (new_post) => this.props.history.push("/" + this.props.current_post.category + "/" + (this.state.main_post_id||new_post.post.id)) );
     }
     
     e.preventDefault();
@@ -89,7 +109,8 @@ class NewEditItemView extends Component {
           { this.state.mode === "new" && ! this.state.is_comment ? (
           <div>
             Category: &nbsp;
-            <select value={this.state.selected_category}  onChange={(e) => this.onCategoryChange(e)}>
+            <select value={this.state.selected_category !== undefined ? this.state.selected_category : (this.props.categories.length > 0 ? this.props.categories[0].path : "")}  onChange={(e) => this.onCategoryChange(e)}>
+              <option key={"select"} value={""}>Please select a category...</option>
               { this.props.categories.map((category) => (<option key={category.path} value={category.path}>{category.name}</option>)) }
             </select>
           </div>) : ""}
