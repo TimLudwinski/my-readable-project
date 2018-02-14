@@ -8,6 +8,7 @@ import CategoriesSidebar from './CategoriesSidebar.js';
 import ListView from './ListView.js';
 import ItemView from './ItemView.js';
 import NewEditItemView from './NewEditItemView.js';
+import NotFoundPage from './NotFoundPage.js';
 import { setCategories, selectCategory } from '../actions';
 import { getCategories } from '../utils';
 
@@ -35,6 +36,7 @@ class App extends Component {
             <Route exact path="/new/:id/comment"  component={NewEditItemView} />
             <Route exact path="/edit/:id" component={NewEditItemView} />
             <Route exact path="/edit/:id/comment/:comment_id" component={NewEditItemView} />
+            <Route exact path="/not_found" component={NotFoundPage} />
             { this.props.categories.map((category) => (<Route exact path={"/" + category.path} key={category.path} component={ListView} />)) }            
             { this.props.categories.map((category) => (<Route exact path={"/" + category.path + "/:id"} key={category.path + "_id"} component={ItemView} />)) }
           </div>

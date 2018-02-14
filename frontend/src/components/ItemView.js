@@ -8,7 +8,8 @@ class ItemView extends Component  {
   componentDidMount() {
     if (this.props.location) {
       const path_split = this.props.location.pathname.split("/");
-      getPostData(path_split[2], this.props.setCurrentPost, this.props.setComments);
+      getPostData(path_split[2], this.props.setCurrentPost, this.props.setComments)
+        .then(() => { if (Object.keys(this.props.current_post).length === 0 || this.props.current_post.deleted || this.props.current_post.error) this.props.history.push("/not_found") })
     }
   }
   
